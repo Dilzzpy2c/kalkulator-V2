@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Canggih - Dil Project</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-glow:active {
+            transform: scale(0.95);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 min-h-screen text-slate-100 flex flex-col justify-between overflow-x-hidden">
+
+    <header class="w-full p-4 md:px-8 flex justify-between items-center border-b border-white/10 glass-dark z-20">
+        <div class="flex items-center space-x-3">
+            <div class="bg-gradient-to-tr from-indigo-500 to-purple-500 p-2.5 rounded-2xl shadow-lg shadow-indigo-500/30">
+                <i class="fa-solid fa-calculator text-xl text-white"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-wide bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">DIL CALCULATOR</h1>
+                <p class="text-xs text-indigo-400 font-medium">Ultimate Multi-Functional Suite</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                v2.5 Pro
+            </span>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-6 flex-grow flex flex-col items-center justify-center max-w-5xl">
+        
+        <!-- Navigation Modes -->
+        <div class="flex flex-wrap justify-center gap-2 mb-6 bg-slate-900/60 p-1.5 rounded-2xl border border-white/10 backdrop-blur-md">
+            <button onclick="switchMode('standard')" id="tab-standard" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 bg-indigo-600 text-white shadow-lg shadow-indigo-600/30">
+                <i class="fa-solid fa-calculator mr-1.5"></i> Standar
+            </button>
+            <button onclick="switchMode('scientific')" id="tab-scientific" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-flask mr-1.5"></i> Saintifik
+            </button>
+            <button onclick="switchMode('unit')" id="tab-unit" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-arrows-rotate mr-1.5"></i> Konversi
+            </button>
+            <button onclick="switchMode('bmi')" id="tab-bmi" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-weight-scale mr-1.5"></i> BMI & Kesehatan
+            </button>
+            <button onclick="switchMode('loan')" id="tab-loan" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-building-columns mr-1.5"></i> Pinjaman/KPR
+            </button>
+        </div>
+
+        <!-- Calculator Container Grid -->
+        <div class="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Left Side: Dynamic Calculator Workspace -->
+            <div class="lg:col-span-8 glass-dark rounded-3xl p-6 shadow-2xl shadow-indigo-950/50 relative overflow-hidden">
+                <div class="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <!-- Display Panel (For Calculator & Scientific) -->
+                <div id="calculator-display-container" class="mb-6 bg-slate-950/80 rounded-2xl p-4 border border-white/10 shadow-inner flex flex-col justify-end min-h-[120px] transition-all">
+                    <div id="expression-display" class="text-slate-400 text-sm font-mono h-6 text-right overflow-x-auto whitespace-nowrap"></div>
+                    <div id="main-display" class="text-white text-3xl md:text-4xl font-bold font-mono text-right overflow-x-auto whitespace-nowrap tracking-wider mt-1">0</div>
+                </div>
+
+                <div id="keypad-section">
+                    <!-- Scientific Extra Row (Hidden in Standard) -->
+                    <div id="scientific-keys" class="grid grid-cols-5 gap-2 mb-2 hidden">
+                        <button onclick="appendFunc('sin(')" class="btn-glow p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl text-xs font-semibold text-indigo-300 border border-white/5">sin</button>
+                        <button onclick="appendFunc('cos(')" class="btn-glow p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl text-xs font-semibold text-indigo-300 border border-white/5">cos</button>
+                        <button onclick="appendFunc('tan(')" class="btn-glow p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl text-xs font-semibold text-indigo-300 border border-white/5">tan</button>
+                        <button onclick="appendFunc('log(')" class="btn-glow p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl text-xs font-semibold text-indigo-300 border border-white/5">log</button>
+                        <button onclick="appendFunc('ln(')" class="btn-glow p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl text-xs font-semibold text-indigo-300 border border-white/5">ln</button>
+
+                        <button onclick="appendChar('^')" class="btn-glow p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl text-xs font-semibold text-indigo-300 border border-white/5">x^y</button>
+                        <button onclick="appendFunc('sqrt(')" class="btn-glow p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl text-xs font-semibold text-indigo-300 border border-white/5">√</button>
+                        <button onclick="appendChar('π')" class="btn-glow p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl text-xs font-semibold text-indigo-300 border border-white/5">π</button>
+                        <button onclick="appendChar('e')" class="btn-glow p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl text-xs font-semibold text-indigo-300 border border-white/5">e</button>
+                        <button onclick="appendChar('!')" class="btn-glow p-3 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl text-xs font-semibold text-indigo-300 border border-white/5">x!</button>
+                    </div>
+
+                    <!-- Main Grid -->
+                    <div id="main-keypad" class="grid grid-cols-4 gap-2.5">
+                        <button onclick="clearAll()" class="btn-glow p-4 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 rounded-2xl font-bold text-lg">AC</button>
+                        <button onclick="deleteLast()" class="btn-glow p-4 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-2xl font-bold text-lg"><i class="fa-solid fa-backspace"></i></button>
+                        <button onclick="appendChar('%')" class="btn-glow p-4 bg-slate-800/80 hover:bg-slate-700/80 text-indigo-300 border border-white/10 rounded-2xl font-bold text-lg">%</button>
+                        <button onclick="appendChar('÷')" class="btn-glow p-4 bg-indigo-600/80 hover:bg-indigo-500 text-white border border-indigo-400/30 rounded-2xl font-bold text-lg">÷</button>
+
+                        <button onclick="appendChar('7')" class="btn-glow p-4 bg-slate-800/40 hover:bg-slate-700/50 text-white border border-white/5 rounded-2xl font-bold text-xl">7</button>
+                        <button onclick="appendChar('8')" class="btn-glow p-4 bg-slate-800/40 hover:bg-slate-700/50 text-white border border-white/5 rounded-2xl font-bold text-xl">8</button>
+                        <button onclick="appendChar('9')" class="btn-glow p-4 bg-slate-800/40 hover:bg-slate-700/50 text-white border border-white/5 rounded-2xl font-bold text-xl">9</button>
+                        <button onclick="appendChar('×')" class="btn-glow p-4 bg-indigo-600/80 hover:bg-indigo-500 text-white border border-indigo-400/30 rounded-2xl font-bold text-lg">×</button>
+
+                        <button onclick="appendChar('4')" class="btn-glow p-4 bg-slate-800/40 hover:bg-slate-700/50 text-white border border-white/5 rounded-2xl font-bold text-xl">4</button>
+                        <button onclick="appendChar('5')" class="btn-glow p-4 bg-slate-800/40 hover:bg-slate-700/50 text-white border border-white/5 rounded-2xl font-bold text-xl">5</button>
+                        <button onclick="appendChar('6')" class="btn-glow p-4 bg-slate-800/40 hover:bg-slate-700/50 text-white border border-white/5 rounded-2xl font-bold text-xl">6</button>
+                        <button onclick="appendChar('-')" class="btn-glow p-4 bg-indigo-600/80 hover:bg-indigo-500 text-white border border-indigo-400/30 rounded-2xl font-bold text-lg">-</button>
+
+                        <button onclick="appendChar('1')" class="btn-glow p-4 bg-slate-800/40 hover:bg-slate-700/50 text-white border border-white/5 rounded-2xl font-bold text-xl">1</button>
+                        <button onclick="appendChar('2')" class="btn-glow p-4 bg-slate-800/40 hover:bg-slate-700/50 text-white border border-white/5 rounded-2xl font-bold text-xl">2</button>
+                        <button onclick="appendChar('3')" class="btn-glow p-4 bg-slate-800/40 hover:bg-slate-700/50 text-white border border-white/5 rounded-2xl font-bold text-xl">3</button>
+                        <button onclick="appendChar('+')" class="btn-glow p-4 bg-indigo-600/80 hover:bg-indigo-500 text-white border border-indigo-400/30 rounded-2xl font-bold text-lg">+</button>
+
+                        <button onclick="appendChar('0')" class="btn-glow p-4 bg-slate-800/40 hover:bg-slate-700/50 text-white border border-white/5 rounded-2xl font-bold text-xl">0</button>
+                        <button onclick="appendChar('.')" class="btn-glow p-4 bg-slate-800/40 hover:bg-slate-700/50 text-white border border-white/5 rounded-2xl font-bold text-xl">.</button>
+                        <button onclick="calculateResult()" class="btn-glow col-span-2 p-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-2xl font-bold text-xl shadow-lg shadow-indigo-500/25">=</button>
+                    </div>
+                </div>
+
+                <!-- Unit Converter Module -->
+                <div id="unit-module" class="hidden space-y-4">
+                    <h3 class="text-lg font-bold text-indigo-300 mb-2"><i class="fa-solid fa-arrows-rotate mr-2"></i>Konversi Satuan</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs text-slate-400 mb-1 block">Kategori</label>
+                            <select id="unit-category" onchange="updateUnitOptions()" class="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
+                                <option value="length">Panjang (Length)</option>
+                                <option value="weight">Massa / Berat (Weight)</option>
+                                <option value="temp">Suhu (Temperature)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400 mb-1 block">Nilai Input</label>
+                            <input type="number" id="unit-input-val" value="1" oninput="convertUnit()" class="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 text-white">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400 mb-1 block">Dari</label>
+                            <select id="unit-from" onchange="convertUnit()" class="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400 mb-1 block">Ke</label>
+                            <select id="unit-to" onchange="convertUnit()" class="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500"></select>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-slate-950/60 rounded-xl border border-white/10 mt-4 text-center">
+                        <span class="text-xs text-slate-400 block mb-1">Hasil Konversi:</span>
+                        <span id="unit-result" class="text-2xl font-bold text-emerald-400 font-mono">0</span>
+                    </div>
+                </div>
+
+                <!-- BMI Calculator Module -->
+                <div id="bmi-module" class="hidden space-y-4">
+                    <h3 class="text-lg font-bold text-indigo-300 mb-2"><i class="fa-solid fa-heart-pulse mr-2"></i>Kalkulator BMI (Body Mass Index)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs text-slate-400 mb-1 block">Tinggi Badan (cm)</label>
+                            <input type="number" id="bmi-height" placeholder="Contoh: 170" class="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 text-white">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400 mb-1 block">Berat Badan (kg)</label>
+                            <input type="number" id="bmi-weight" placeholder="Contoh: 65" class="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 text-white">
+                        </div>
+                    </div>
+                    <button onclick="calculateBMI()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition">Hitung BMI</button>
+                    <div id="bmi-result-box" class="hidden p-4 bg-slate-950/60 rounded-xl border border-white/10 text-center">
+                        <span class="text-xs text-slate-400 block">Skor BMI Anda:</span>
+                        <span id="bmi-score" class="text-3xl font-extrabold text-indigo-400 font-mono my-1 block">0</span>
+                        <span id="bmi-status" class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Ideal</span>
+                    </div>
+                </div>
+
+                <!-- Loan / KPR Calculator Module -->
+                <div id="loan-module" class="hidden space-y-4">
+                    <h3 class="text-lg font-bold text-indigo-300 mb-2"><i class="fa-solid fa-calculator-dollar mr-2"></i>Simulasi Pinjaman / KPR</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                            <label class="text-xs text-slate-400 mb-1 block">Jumlah Pinjaman (Rp)</label>
+                            <input type="number" id="loan-amount" placeholder="100000000" class="w-full bg-slate-900 border border-white/10 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400 mb-1 block">Bunga Per Tahun (%)</label>
+                            <input type="number" id="loan-interest" placeholder="5" step="0.1" class="w-full bg-slate-900 border border-white/10 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400 mb-1 block">Tenor (Tahun)</label>
+                            <input type="number" id="loan-years" placeholder="5" class="w-full bg-slate-900 border border-white/10 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+                    <button onclick="calculateLoan()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition">Hitung Angsuran</button>
+                    
+                    <div id="loan-result-box" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div class="p-4 bg-slate-950/60 rounded-xl border border-white/10">
+                            <span class="text-xs text-slate-400 block">Angsuran / Bulan:</span>
+                            <span id="loan-monthly" class="text-xl font-bold text-emerald-400 font-mono">Rp 0</span>
+                            <span class="text-xs text-slate-400 block mt-2">Total Bunga:</span>
+                            <span id="loan-total-interest" class="text-sm font-semibold text-rose-400 font-mono">Rp 0</span>
+                        </div>
+                        <div class="p-2 bg-slate-950/40 rounded-xl border border-white/10 flex items-center justify-center">
+                            <canvas id="loanChart" class="max-h-32"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="lg:col-span-4 glass-dark rounded-3xl p-6 shadow-2xl shadow-indigo-950/50 flex flex-col h-full min-h-[400px]">
+                <div class="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+                    <h3 class="font-bold text-indigo-300 flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Riwayat Hitung
+                    </h3>
+                    <button onclick="clearHistory()" class="text-xs text-rose-400 hover:text-rose-300 transition">
+                        <i class="fa-solid fa-trash-can mr-1"></i> Bersihkan
+                    </button>
+                </div>
+                
+                <div id="history-list" class="flex-grow overflow-y-auto max-h-[380px] space-y-2.5 pr-1">
+                    <p class="text-xs text-slate-500 text-center py-8">Belum ada riwayat perhitungan.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="w-full p-4 border-t border-white/10 glass-dark text-
